@@ -12,9 +12,15 @@ function loadEnv($path) {
 loadEnv(__DIR__ . '/.env');
 
 try {
+    // Added charset=utf8mb4 to DSN
     $dsn = "mysql:host=" . $_ENV['DB_HOST'] . ";dbname=" . $_ENV['DB_NAME'] . ";charset=utf8mb4";
-    $pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS']);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // SQL command to ensure UTF-8 connection
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+    ];
+    $pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS'], $options);
 } catch (PDOException $e) {
     die("Database Connection Error: " . $e->getMessage());
 }

@@ -5,7 +5,6 @@ $slug = $_GET['slug'] ?? '';
 $testsIndex = json_decode(file_get_contents(__DIR__ . '/tests/tests.json'), true);
 $currentTestFile = null;
 
-// Find the filename based on slug
 foreach ($testsIndex as $t) {
     if ($t['slug'] === $slug) {
         $currentTestFile = $t['filename'];
@@ -17,46 +16,43 @@ if (!$currentTestFile || !file_exists(__DIR__ . '/tests/' . $currentTestFile)) {
     die("Тест не знайдено.");
 }
 
-// Load Test Data
 $testData = json_decode(file_get_contents(__DIR__ . '/tests/' . $currentTestFile), true);
 $submissionSuccess = false;
 
-// Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $age = (int)$_POST['age'];
     
     // Calculate Result
-    // For this specific test type, we collect the ID of the selected option from each pair
-    // and sort them or concatenate them to match the keys in "results" (e.g., "1357")
     $selectedIds = [];
     foreach ($testData['questions'] as $block) {
         if (isset($_POST['q_' . $block['id']])) {
             $selectedIds[] = $_POST['q_' . $block['id']];
         }
     }
-    
-    // Sort to ensure key matches "1357" regardless of order (though usually questions are linear)
     sort($selectedIds);
     $resultKey = implode('', $selectedIds);
-    
-    // Find result in JSON
     $resultData = $testData['results'][$resultKey] ?? null;
-    
-    $resultName = $resultData ? $resultData['name'] : 'Unknown';
-    $resultDesc = $resultData ? $resultData['description'] : 'Результат не визначено';
-    $resultProf = $resultData ? $resultData['recommendedProfessions'] : '';
 
-    // Save to DB
-    $stmt = $pdo->prepare("INSERT INTO test_results (test_type_id, test_slug, user_name, user_age, result_key, result_explanation, result_profession, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    // 1. Pack everything into one array
+    $packedResult = [
+        'key' => $resultKey,
+        'name' => $resultData ? $resultData['name'] : 'Unknown',
+        'description' => $resultData ? $resultData['description'] : 'N/A',
+        'professions' => $resultData ? $resultData['recommendedProfessions'] : 'N/A',
+        'test_type' => $testData['type']
+    ];
+
+    // 2. Encode to JSON with UTF-8 flags
+    $jsonString = json_encode($packedResult, JSON_UNESCAPED_UNICODE);
+
+    // 3. Save to DB
+    $stmt = $pdo->prepare("INSERT INTO test_results (test_slug, user_name, user_age, result_json, ip_address) VALUES (?, ?, ?, ?, ?)");
     $stmt->execute([
-        $testData['type'],
         $slug,
         $name,
         $age,
-        $resultName, // Storing Result Name (e.g., "Хранитель") as key summary
-        $resultDesc,
-        $resultProf,
+        $jsonString,
         $_SERVER['REMOTE_ADDR']
     ]);
     
@@ -112,11 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row g-3 mb-4 border-bottom pb-4">
                         <div class="col-md-8">
                             <label for="name" class="form-label">Ваше ім'я</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
+                            <input type="text" class="form-control" id="name" name="name" required />
                         </div>
                         <div class="col-md-4">
                             <label for="age" class="form-label">Вік</label>
-                            <input type="number" class="form-control" id="age" name="age" required>
+                            <input type="number" class="form-control" id="age" name="age" required min="16" max="100" />
                         </div>
                     </div>
 
