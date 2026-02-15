@@ -1,0 +1,18 @@
+# Prevent directory browsing (hides the list of files)
+Options -Indexes
+
+# 1. Block access to hidden files (starts with a dot, like .env, .htaccess)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# 2. Block access to specific internal files (db.php, README.md)
+# The (?i) makes it case-insensitive (blocks readme.md and README.MD)
+<FilesMatch "^(db\.php|(?i)readme\.md)$">
+    Require all denied
+</FilesMatch>
+
+# 3. Security headers (Optional but recommended)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
