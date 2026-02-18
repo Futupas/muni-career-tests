@@ -52,11 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userAnswers[$key] = $value;
             }
         }
+        $packedResult['user_answers'] = $userAnswers;
         
         $jsonString = json_encode($packedResult, JSON_UNESCAPED_UNICODE);
-
-        // Add them to the packed array
-        $packedResult['user_answers'] = $userAnswers;
 
         $stmt = $pdo->prepare("INSERT INTO test_results (test_slug, user_name, user_age, result_json, ip_address) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$slug, $name, $age, $jsonString, $_SERVER['REMOTE_ADDR']]);
