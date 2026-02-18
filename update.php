@@ -1,10 +1,14 @@
 <?php
-// Prevent timeouts for large downloads
-set_time_limit(300);
+// Prevent timeouts during download/move operations
+set_time_limit(600);
+ini_set('memory_limit', '256M');
 
-// 1. Load Environment Variables directly
-// We do this manually to rely on the file on disk, not external helpers
-$envPath = __DIR__ . '/.env';
+// ==========================================
+// 1. LOAD CONFIGURATION
+// ==========================================
+$baseDir = __DIR__;
+$envPath = $baseDir . '/.env';
+
 if (file_exists($envPath)) {
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
@@ -12,70 +16,138 @@ if (file_exists($envPath)) {
         list($name, $value) = explode('=', $line, 2);
         $_ENV[trim($name)] = trim($value);
     }
-} else {
-    die("Error: .env file not found.");
 }
 
-// 2. HTTP Basic Authentication
-// Checks credentials against values found in .env
-$validUser = $_ENV['UPDATE_USER'] ?? null;
-$validPass = $_ENV['UPDATE_PASS'] ?? null;
-$downloadUrl = $_ENV['UPDATE_URL'] ?? null;
+$authUser   = $_ENV['UPDATE_USER'] ?? null;
+$authPass   = $_ENV['UPDATE_PASS'] ?? null;
+$updateUrl  = $_ENV['UPDATE_URL']  ?? null;
+// The folder name expected inside the ZIP
+$sourceName = $_ENV['UPDATE_FOLDER_NAME'] ?? 'muni-career-tests-master';
 
-if (!$validUser || !$validPass || !$downloadUrl) {
-    die("Error: Missing UPDATE_USER, UPDATE_PASS, or UPDATE_URL in .env file.");
+// ==========================================
+// 2. AUTHENTICATION
+// ==========================================
+if (!$authUser || !$authPass || !$updateUrl) {
+    die("Error: Missing configuration in .env");
 }
 
 if (!isset($_SERVER['PHP_AUTH_USER']) || 
-    $_SERVER['PHP_AUTH_USER'] !== $validUser || 
-    $_SERVER['PHP_AUTH_PW'] !== $validPass) {
-    
+    $_SERVER['PHP_AUTH_USER'] !== $authUser || 
+    $_SERVER['PHP_AUTH_PW'] !== $authPass) {
     header('WWW-Authenticate: Basic realm="System Update"');
     header('HTTP/1.0 401 Unauthorized');
     die('Access Denied');
 }
 
-// 3. The Update Logic
-$tempZip = __DIR__ . '/../temp_update.zip';
+// ==========================================
+// 3. HELPER FUNCTIONS
+// ==========================================
 
-echo "<h3>System Update</h3>";
-echo "Downloading update from: " . htmlspecialchars($downloadUrl) . "...<br>";
+/**
+ * Recursively moves files and directories from source to destination.
+ * Overwrites existing files. Merges directories.
+ */
+function recursiveMove($src, $dst) {
+    $dir = opendir($src);
+    @mkdir($dst); // Ensure destination folder exists
 
-// Download the ZIP file
-$zipData = @file_get_contents($downloadUrl);
+    while (false !== ($file = readdir($dir))) {
+        if (($file != '.') && ($file != '..')) {
+            $srcFile = $src . '/' . $file;
+            $dstFile = $dst . '/' . $file;
 
-if ($zipData === false) {
-    die("<h4 style='color:red'>Failed to download file. Check URL and server internet connection.</h4>");
-}
+            // PROTECT CRITICAL FILES
+            // Do not overwrite .env or this update script itself
+            if ($file === '.env' || $file === 'update.php') {
+                continue;
+            }
 
-if (file_put_contents($tempZip, $zipData) === false) {
-    die("<h4 style='color:red'>Failed to save ZIP to disk. Check write permissions.</h4>");
-}
-
-echo "Download complete. Extracting...<br>";
-
-// Unzip and Overwrite EVERYTHING
-$zip = new ZipArchive;
-if ($zip->open($tempZip) === TRUE) {
-    
-    // extractTo overwrites existing files by default
-    if ($zip->extractTo(__DIR__)) {
-        $zip->close();
-        echo "<h2 style='color:green'>SUCCESS</h2>";
-        echo "All files have been updated.";
-    } else {
-        $zip->close();
-        echo "<h2 style='color:red'>Extraction Failed</h2>";
-        echo "Could not extract files. Check folder permissions.";
+            if (is_dir($srcFile)) {
+                // If it's a directory, recurse into it
+                recursiveMove($srcFile, $dstFile);
+            } else {
+                // If it's a file, move it (overwrite)
+                // We use copy+unlink because rename() often fails across partitions or on Windows
+                if (copy($srcFile, $dstFile)) {
+                    unlink($srcFile);
+                } else {
+                    echo "Failed to move: $dstFile <br>";
+                }
+            }
+        }
     }
+    closedir($dir);
     
-} else {
-    echo "<h2 style='color:red'>Invalid ZIP</h2>";
-    echo "Could not open the downloaded file. It might be corrupt.";
+    // Remove the source directory now that it is empty
+    @rmdir($src);
 }
 
-// Cleanup
-if (file_exists($tempZip)) {
-    unlink($tempZip);
+/**
+ * Recursively deletes a directory (used for cleanup if something goes wrong)
+ */
+function rrmdir($dir) {
+    if (is_dir($dir)) {
+        $objects = scandir($dir);
+        foreach ($objects as $object) {
+            if ($object != "." && $object != "..") {
+                if (is_dir($dir . DIRECTORY_SEPARATOR . $object) && !is_link($dir . DIRECTORY_SEPARATOR . $object))
+                    rrmdir($dir . DIRECTORY_SEPARATOR . $object);
+                else
+                    unlink($dir . DIRECTORY_SEPARATOR . $object);
+            }
+        }
+        rmdir($dir);
+    }
 }
+
+// ==========================================
+// 4. MAIN EXECUTION FLOW
+// ==========================================
+
+echo "<body style='font-family: sans-serif; background: #222; color: #fff; padding: 20px;'>";
+echo "<h2>🚀 System Update</h2><pre>";
+
+$zipFile = $baseDir . '/update_pkg.zip';
+$extractedPath = $baseDir . '/' . $sourceName;
+
+try {
+    // --- STEP 1: DOWNLOAD ---
+    echo "1. Downloading package from URL...\n";
+    $data = @file_get_contents($updateUrl);
+    if ($data === false) throw new Exception("Download failed. Check URL.");
+    file_put_contents($zipFile, $data);
+
+    // --- STEP 2: UNZIP ---
+    echo "2. Unzipping archive...\n";
+    $zip = new ZipArchive;
+    if ($zip->open($zipFile) === TRUE) {
+        $zip->extractTo($baseDir);
+        $zip->close();
+    } else {
+        throw new Exception("Could not open ZIP file.");
+    }
+
+    // Check if the folder exists
+    if (!is_dir($extractedPath)) {
+        throw new Exception("Expected folder '$sourceName' was not found in the zip file.<br>Check UPDATE_FOLDER_NAME in .env");
+    }
+
+    // --- STEP 3: RECURSIVE MOVE (MERGE) ---
+    echo "3. Moving files and merging folders...\n";
+    recursiveMove($extractedPath, $baseDir);
+
+    echo "<h3 style='color: #4caf50'>✔ SUCCESS: Update complete.</h3>";
+
+} catch (Exception $e) {
+    echo "<h3 style='color: #f44336'>✖ ERROR: " . $e->getMessage() . "</h3>";
+} finally {
+    // --- STEP 4: CLEANUP ---
+    echo "4. Cleanup...\n";
+    if (file_exists($zipFile)) unlink($zipFile);
+    
+    // Use rrmdir just in case recursiveMove left scraps behind
+    if (is_dir($extractedPath)) rrmdir($extractedPath);
+}
+
+echo "</pre></body>";
 ?>

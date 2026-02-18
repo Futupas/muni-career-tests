@@ -21,7 +21,7 @@ if (file_exists($testsFile)) {
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Доступні тести XXXXXX</h1>
+        <h1>Доступні тести</h1>
         <button class="btn btn-outline-primary" id="themeToggle">🌓 Тема</button>
     </div>
 
