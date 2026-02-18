@@ -7,7 +7,7 @@ if (file_exists($testsFile)) {
 ?>
 <!DOCTYPE html>
 <html lang="uk">
-<!-- <?php echo getenv('CREDITS') ?: 'Development Credits'; ?> -->
+<!-- <?php echo getenv('CREDITS') ?: 'futupas'; ?> -->
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

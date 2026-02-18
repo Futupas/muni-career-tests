@@ -26,3 +26,5 @@ RewriteRule ^test/?$ test.php [L,QSA]
 # 2. Handle /test/XXX 
 # We capture XXX and send it to test.php?slug=XXX
 RewriteRule ^test/([a-zA-Z0-9_-]+)/?$ test.php?slug=$1 [L,QSA]
+
+SetEnv CREDITS "Futupas - https://futupas.github.io"
