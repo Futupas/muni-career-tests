@@ -42,7 +42,7 @@ if (file_exists($testsFile)) {
                         <div id="desc-<?php echo $test['slug']; ?>" class="spoiler-content mb-3 text-muted">
                             <?php echo htmlspecialchars($test['description']); ?>
                         </div>
-                        <a href="test.php?slug=<?php echo $test['slug']; ?>" class="btn btn-primary">Пройти тест</a>
+                        <a href="/test/<?php echo $test['slug']; ?>" class="btn btn-primary">Пройти тест</a>
                     </div>
                 </div>
             </div>

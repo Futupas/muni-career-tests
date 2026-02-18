@@ -2,6 +2,13 @@
 require 'db.php';
 
 $slug = $_GET['slug'] ?? '';
+
+// Check if slug is empty (user went to /test)
+if (empty($slug)) {
+    http_response_code(404);
+    die("Ви маєте вказати конкретний тест. <a href='/'>Повернутися на головну</a>");
+}
+
 $testsIndex = json_decode(file_get_contents(__DIR__ . '/tests/tests.json'), true);
 $currentTestFile = null;
 
@@ -12,8 +19,10 @@ foreach ($testsIndex as $t) {
     }
 }
 
+// Check if slug doesn't exist (user went to /test/wrong-slug)
 if (!$currentTestFile || !file_exists(__DIR__ . '/tests/' . $currentTestFile)) {
-    die("Тест не знайдено.");
+    http_response_code(404);
+    die("Тест не знайдено. <a href='/'>Повернутися на головну</a>");
 }
 
 $testData = json_decode(file_get_contents(__DIR__ . '/tests/' . $currentTestFile), true);
@@ -24,14 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $age = (int)$_POST['age'];
     
-    // Result object to be populated by logic handlers
     $packedResult = [
         'test_slug' => $slug,
         'test_name' => $testData['name'],
         'test_type' => $type
     ];
 
-    // Include the specific calculation logic
     $logicFile = __DIR__ . "/handlers/logic_{$type}.php";
     if (file_exists($logicFile)) {
         include $logicFile;
@@ -51,24 +58,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?php echo htmlspecialchars($testData['name']); ?></title>
+    <!-- Use absolute path for CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script>
         document.documentElement.setAttribute('data-bs-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     </script>
     <style>
-        .option-label { cursor: pointer; height: 100%; transition: 0.2; border: 1px solid var(--bs-border-color); }
+        .option-label { cursor: pointer; height: 100%; transition: 0.2s; border: 1px solid var(--bs-border-color); }
         .option-input:checked + .option-label { background-color: var(--bs-primary); color: white; border-color: var(--bs-primary); }
     </style>
 </head>
 <body class="bg-body-tertiary">
 <div class="container py-5" style="max-width: 800px;">
-    <div class="mb-4"><a href="index.php" class="btn btn-outline-secondary">← На головну</a></div>
+    <!-- Absolute link to home -->
+    <div class="mb-4"><a href="/" class="btn btn-outline-secondary">← На головну</a></div>
 
     <?php if ($submissionSuccess): ?>
         <div class="card text-center border-success shadow"><div class="card-body py-5">
             <h2 class="text-success">Дякуємо!</h2>
             <p class="lead">Ваші відповіді збережено в базі даних для подальшого аналізу.</p>
-            <a href="index.php" class="btn btn-primary mt-3">До тестів</a>
+            <a href="/" class="btn btn-primary mt-3">До списку тестів</a>
         </div></div>
     <?php else: ?>
         <div class="card shadow-sm">

@@ -1,10 +1,17 @@
 <div class="row g-3 text-center">
-    <?php foreach ($testData['questions'][0]['questions'] as $q): ?>
+    <?php 
+    $block = $testData['questions'][0]; // Get the first block
+    foreach ($block['questions'] as $qIndex => $q): 
+        $safeId = "shape_" . $qIndex;
+    ?>
         <div class="col">
-            <input type="radio" class="btn-check" name="q_1" id="i<?php echo $q['value']; ?>" value="<?php echo $q['value']; ?>" required>
-            <label class="card card-body option-label h-100" for="i<?php echo $q['value']; ?>">
-                <div class="display-4 mb-2"><?php echo $q['img']; ?></div>
-                <small><?php echo htmlspecialchars($q['text']); ?></small>
+            <input type="radio" class="btn-check" 
+                   name="q_<?php echo $block['id']; ?>" 
+                   id="<?php echo $safeId; ?>" 
+                   value="<?php echo htmlspecialchars($q['value']); ?>" required>
+            <label class="card card-body option-label h-100 d-flex flex-column align-items-center justify-content-center" for="<?php echo $safeId; ?>">
+                <div class="fs-1 mb-2"><?php echo $q['img']; ?></div>
+                <small class="fw-bold"><?php echo htmlspecialchars($q['text']); ?></small>
             </label>
         </div>
     <?php endforeach; ?>
