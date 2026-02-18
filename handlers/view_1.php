@@ -11,7 +11,7 @@
                     <input type="radio" class="btn-check" 
                            name="q_<?php echo $block['id']; ?>" 
                            id="<?php echo $safeId; ?>" 
-                           value="<?php echo htmlspecialchars($q['value']); ?>" required>
+                           value="<?php echo htmlspecialchars($q['value']); ?>" required />
                     <label class="card card-body option-label h-100 d-flex align-items-center" for="<?php echo $safeId; ?>">
                         <?php echo htmlspecialchars($q['text']); ?>
                     </label>
