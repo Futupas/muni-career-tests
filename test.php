@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $resultData = null;
     $packedResult = [];
 
-    // --- LOGIC TYPE 1: Combination (e.g. Karnaukh 1357) ---
+    // --- TYPE 1: Combination (e.g. Karnaukh "1357") ---
     if ($testData['type'] == 1) {
         $selectedIds = [];
         foreach ($testData['questions'] as $block) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resultKey = implode('', $selectedIds);
         $resultData = $testData['results'][$resultKey] ?? null;
     } 
-    // --- LOGIC TYPE 2: Summation/Category Max (e.g. Holland) ---
+    // --- TYPE 2: Category Summation (e.g. Holland) ---
     elseif ($testData['type'] == 2) {
         $scores = [];
         foreach ($testData['questions'] as $block) {
@@ -53,28 +53,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if (!empty($scores)) {
-            arsort($scores); // Sort high to low
+            arsort($scores); 
             $resultKey = array_key_first($scores);
             $resultData = $testData['results'][$resultKey] ?? null;
         }
     }
-    // --- LOGIC TYPE 3: Scoring Keys & Ranges (e.g. Potemkina) ---
+    // --- TYPE 3: Scoring Keys (e.g. Potemkina) ---
     elseif ($testData['type'] == 3) {
         $score = 0;
         foreach ($testData['questions'] as $q) {
             $inputName = 'q_' . $q['id'];
             if (isset($_POST[$inputName])) {
-                $userAnswer = $_POST[$inputName]; // 'yes' or 'no'
-                // Check if this answer gives points
+                $userAnswer = $_POST[$inputName]; 
                 if (in_array($q['id'], $testData['scoring_key'][$userAnswer])) {
                     $score++;
                 }
             }
         }
-        
-        $resultKey = (string)$score; // Store score as key
-        
-        // Find range
+        $resultKey = (string)$score; 
         foreach ($testData['results'] as $range => $data) {
             [$min, $max] = explode('-', $range);
             if ($score >= (int)$min && $score <= (int)$max) {
@@ -83,16 +79,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-    // --- LOGIC TYPE 4: Direct Selection (e.g. Psychogeometry) ---
+    // --- TYPE 4: Direct Selection (e.g. Psychogeometry) ---
     elseif ($testData['type'] == 4) {
-        // Assumes only 1 question block determines the result
         $inputName = 'q_' . $testData['questions'][0]['id'];
         if (isset($_POST[$inputName])) {
             $resultKey = $_POST[$inputName];
             $resultData = $testData['results'][$resultKey] ?? null;
         }
     }
-    // --- LOGIC TYPE 5: Text Input / Exercise (e.g. Positive Sides) ---
+    // --- TYPE 5: Text Input / Exercise ---
     elseif ($testData['type'] == 5) {
         $answers = [];
         foreach ($testData['questions'] as $q) {
@@ -102,18 +97,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resultKey = 'saved';
         $resultData = [
             'name' => 'Вправа завершена',
-            'description' => 'Ваші відповіді збережено для подальшого обговорення.',
-            'professions' => ''
+            'description' => 'Відповіді збережено.',
+            'recommendedProfessions' => ''
         ];
         $packedResult['user_answers'] = $answers;
     }
 
-    // Pack Result
+    // Pack Result for DB
     $packedResult = array_merge($packedResult, [
-        'key' => $resultKey,
-        'name' => $resultData ? $resultData['name'] : 'Unknown',
-        'description' => $resultData ? $resultData['description'] : 'N/A',
-        'professions' => $resultData['recommendedProfessions'] ?? 'N/A',
+        'test_slug' => $slug,
+        'test_name' => $testData['name'], // Saving Test Name in DB JSON
+        'result_key' => $resultKey,
+        'result_name' => $resultData ? $resultData['name'] : 'Unknown',
+        'result_description' => $resultData ? $resultData['description'] : 'N/A',
+        'result_professions' => $resultData['recommendedProfessions'] ?? 'N/A',
         'test_type' => $testData['type']
     ]);
 
@@ -132,29 +129,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?php echo htmlspecialchars($testData['name']); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script>
+        // Apply browser theme immediately
+        const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', theme);
+    </script>
     <style>
         .option-label { cursor: pointer; height: 100%; transition: 0.2s; border: 1px solid var(--bs-border-color); }
         .option-input:checked + .option-label { background-color: var(--bs-primary); color: white; border-color: var(--bs-primary); }
-        .img-option { max-width: 100px; margin: 0 auto; display: block; }
     </style>
 </head>
 <body class="bg-body-tertiary">
 <div class="container py-5" style="max-width: 800px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <a href="index.php" class="btn btn-outline-secondary">← На головну</a>
-        <button class="btn btn-outline-primary" id="themeToggle">🌓 Тема</button>
     </div>
 
     <?php if ($submissionSuccess): ?>
         <div class="card text-center border-success mb-3 shadow">
             <div class="card-body py-5">
                 <h2 class="card-title text-success mb-3">Дякуємо!</h2>
-                <p class="card-text lead">Ваші результати збережено.</p>
-                <?php if ($testData['type'] != 5): ?>
-                    <hr>
-                    <h4>Ваш результат: <?php echo htmlspecialchars($packedResult['name']); ?></h4>
-                    <p><?php echo nl2br(htmlspecialchars($packedResult['description'])); ?></p>
-                <?php endif; ?>
+                <p class="card-text lead">Ваші результати успішно збережено в базі даних.</p>
                 <a href="index.php" class="btn btn-primary mt-3">До списку тестів</a>
             </div>
         </div>
@@ -177,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <?php if ($testData['type'] == 5): // Text Inputs ?>
+                    <?php if ($testData['type'] == 5): ?>
                         <?php foreach ($testData['questions'] as $q): ?>
                             <div class="mb-3">
                                 <label class="form-label fw-bold"><?php echo htmlspecialchars($q['text']); ?></label>
@@ -185,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         <?php endforeach; ?>
 
-                    <?php elseif ($testData['type'] == 3): // Yes/No List ?>
+                    <?php elseif ($testData['type'] == 3): ?>
                         <div class="mb-4">
                             <?php foreach ($testData['questions'] as $q): ?>
                                 <div class="row mb-2 align-items-center border-bottom pb-2">
@@ -202,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endforeach; ?>
                         </div>
 
-                    <?php else: // Standard Blocks (Types 1, 2, 4) ?>
+                    <?php else: ?>
                         <?php foreach ($testData['questions'] as $block): ?>
                             <div class="mb-4">
                                 <?php if(!empty($block['name'])): ?><h5 class="mb-3 text-primary"><?php echo htmlspecialchars($block['name']); ?></h5><?php endif; ?>
@@ -213,10 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                    name="q_<?php echo $block['id']; ?>" 
                                                    id="opt_<?php echo $block['id'] . '_' . $q['value']; ?>" 
                                                    value="<?php echo $q['value']; ?>" required>
-                                            <label class="card card-body option-label text-center" for="opt_<?php echo $block['id'] . '_' . $q['value']; ?>">
+                                            <label class="card card-body option-label text-center h-100 d-flex align-items-center justify-content-center" for="opt_<?php echo $block['id'] . '_' . $q['value']; ?>">
                                                 <?php if(isset($q['img'])): ?>
-                                                    <!-- Placeholder for shapes -->
-                                                    <div style="font-size: 2rem;"><?php echo $q['img']; ?></div>
+                                                    <div class="fs-1 mb-2"><?php echo $q['img']; ?></div>
                                                 <?php endif; ?>
                                                 <?php echo htmlspecialchars($q['text']); ?>
                                             </label>
@@ -248,8 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 form.classList.add('was-validated');
             }, false)
         })
-    })()
-    // Theme logic omitted for brevity, same as previous
+    })();
 </script>
 </body>
 </html>
