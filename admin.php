@@ -22,7 +22,7 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     <!DOCTYPE html>
     <html lang="uk" data-bs-theme="dark">
     <head>
-        <!-- <?php echo getenv('CREDITS') ?: 'Development Credits'; ?> -->
+        <!-- <?php echo getenv('CREDITS') ?: 'Futupas - https://futupas.github.io'; ?> -->
         <meta charset="UTF-8" />
         <title>Admin Login</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -72,7 +72,7 @@ $results = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="uk" data-bs-theme="dark">
-<!-- <?php echo getenv('CREDITS') ?: 'futupas'; ?> -->
+<!-- <?php echo getenv('CREDITS') ?: 'Futupas - https://futupas.github.io'; ?> -->
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
