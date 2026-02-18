@@ -92,6 +92,12 @@ if (file_exists($testsFile)) {
             setTheme(newTheme);
         });
     }
+    
+    // Spoiler Toggle
+    function toggleSpoiler(id) {
+        const el = document.getElementById(id);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
 </script>
 </body>
 </html>
