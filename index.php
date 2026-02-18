@@ -12,6 +12,10 @@ if (file_exists($testsFile)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тести на профорієнтацію</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', theme);
+    </script>
     <style>
         .spoiler-content { display: none; }
         .card:hover { transform: translateY(-5px); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
@@ -20,9 +24,8 @@ if (file_exists($testsFile)) {
 <body class="bg-body-tertiary">
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
         <h1>Доступні тести</h1>
-        <button class="btn btn-outline-primary" id="themeToggle">🌓 Тема</button>
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 g-4">
@@ -49,50 +52,6 @@ if (file_exists($testsFile)) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 1. Function to determine the preferred theme
-    const getPreferredTheme = () => {
-        const storedTheme = localStorage.getItem('theme');
-        if (storedTheme) {
-            return storedTheme;
-        }
-        // Check system preference (media query)
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    };
-
-    // 2. Function to apply the theme
-    const setTheme = function (theme) {
-        document.documentElement.setAttribute('data-bs-theme', theme);
-        localStorage.setItem('theme', theme);
-        
-        // Optional: Change button text/icon based on theme
-        const btn = document.getElementById('themeToggle');
-        if(btn) {
-            btn.innerHTML = theme === 'dark' ? '☀️ Світла тема' : '🌑 Темна тема';
-            btn.className = theme === 'dark' ? 'btn btn-outline-light' : 'btn btn-outline-dark';
-        }
-    };
-
-    // 3. Apply theme immediately on load
-    setTheme(getPreferredTheme());
-
-    // 4. Listen for System Changes (if user changes OS theme while page is open)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-        // Only apply system change if user hasn't manually overridden it in localStorage
-        if (!localStorage.getItem('theme')) {
-            setTheme(event.matches ? 'dark' : 'light');
-        }
-    });
-
-    // 5. Toggle Button Logic
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            setTheme(newTheme);
-        });
-    }
-    
     // Spoiler Toggle
     function toggleSpoiler(id) {
         const el = document.getElementById(id);
