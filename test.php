@@ -13,7 +13,7 @@ foreach ($testsIndex as $t) {
 }
 
 if (!$currentTestFile || !file_exists(__DIR__ . '/tests/' . $currentTestFile)) {
-    die("Тест не знайдено.");
+    die('Тест не знайдено. <a href="/">На головну</a>');
 }
 
 $testData = json_decode(file_get_contents(__DIR__ . '/tests/' . $currentTestFile), true);
@@ -46,7 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             include $logicFile;
         }
 
+        $userAnswers = [];
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'q_') === 0) {
+                $userAnswers[$key] = $value;
+            }
+        }
+        
         $jsonString = json_encode($packedResult, JSON_UNESCAPED_UNICODE);
+
+        // Add them to the packed array
+        $packedResult['user_answers'] = $userAnswers;
 
         $stmt = $pdo->prepare("INSERT INTO test_results (test_slug, user_name, user_age, result_json, ip_address) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$slug, $name, $age, $jsonString, $_SERVER['REMOTE_ADDR']]);
@@ -57,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="uk">
+<!-- <?php echo getenv('CREDITS') ?: 'Development Credits'; ?> -->
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

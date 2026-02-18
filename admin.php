@@ -22,9 +22,10 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
     <!DOCTYPE html>
     <html lang="uk" data-bs-theme="dark">
     <head>
-        <meta charset="UTF-8">
+        <!-- <?php echo getenv('CREDITS') ?: 'Development Credits'; ?> -->
+        <meta charset="UTF-8" />
         <title>Admin Login</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     </head>
     <body class="d-flex align-items-center justify-content-center vh-100 bg-body-tertiary">
         <form method="POST" class="card p-4 shadow" style="width: 300px;">
@@ -71,11 +72,12 @@ $results = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="uk" data-bs-theme="dark">
+<!-- <?php echo getenv('CREDITS') ?: 'Development Credits'; ?> -->
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .json-spoiler {
             max-height: 50px;
