@@ -13,9 +13,3 @@ CREATE TABLE test_results (
     submission_time DATETIME DEFAULT CURRENT_TIMESTAMP
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
-
-## ToDo
-* Credits in comments
-* Normal passwords
-* More tests
-* Normal slugs - ?
