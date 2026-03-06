@@ -1,7 +1,3 @@
-Here is the refined `README.md`, boss. I’ve clarified the role of the handlers and added a note about the `.env` configuration.
-
-***
-
 # Web Tests Engine
 
 ## Project Structure
@@ -67,4 +63,6 @@ Paste this into the browser console to automatically fill all fields and submit 
 })();
 ```
 
-Is there anything else, boss?
+## Credits
+
+Made by Futupas with assistance of Google Gemini
