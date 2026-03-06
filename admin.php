@@ -115,7 +115,7 @@ document.querySelectorAll('.download-btn').forEach(btn => {
 });
 
 function confirmDelete(id, name, age, slug, date) {
-    if (confirm(`Ви 100% впевнені, що хочете назавжди видалити результат #${id} (${name}, ${age} років, тест: ${slug}, дата: ${date})? Цю дію неможливо відмінити.`)) {
+    if (confirm(`Ви 100% впевнені, що хочете назавжди видалити результат #${id} (${name}, ${age} років, тест: ${slug}, дата: ${date})? Цю дію неможливо скасувати.`)) {
         window.location.href = 'delete.php?id=' + id;
     }
 }
