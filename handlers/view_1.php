@@ -2,7 +2,7 @@
     <?php foreach ($testData['questions'] as $block): ?>
         <div class="col-12">
             <div class="card h-100 shadow-sm border-0">
-                <div class="card-header fw-bold bg-light">
+                <div class="card-header fw-bold">
                     <?php echo htmlspecialchars($block['name']); ?>
                 </div>
                 <div class="card-body">

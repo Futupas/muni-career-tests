@@ -1,69 +1,84 @@
 <?php
 $scores = [];
-$validityWarning = "";
+$warnings = [];
+$elevatedScales = [];
+$highScales = [];
+$professions = [];
+$matchedCombinations = [];
 
-// Initialize scores for all scales
-foreach ($testData['scales'] as $code => $scaleData) {
-    $scores[$code] = 0;
-}
-
-// Calculate scores based on keys
-foreach ($testData['scales'] as $code => $scaleData) {
-    // Check 'yes' keys
-    if (isset($scaleData['keys']['yes'])) {
-        foreach ($scaleData['keys']['yes'] as $qId) {
-            if (isset($_POST["q_$qId"]) && $_POST["q_$qId"] == '1') {
-                $scores[$code]++;
-            }
+// Calculate scores
+foreach ($testData['scales'] as $code => $scale) {
+    $currentScore = 0;
+    if (isset($scale['yes'])) {
+        foreach ($scale['yes'] as $id) {
+            if (($_POST["q_$id"] ?? '') == '1') $currentScore++;
         }
     }
-    // Check 'no' keys
-    if (isset($scaleData['keys']['no'])) {
-        foreach ($scaleData['keys']['no'] as $qId) {
-            if (isset($_POST["q_$qId"]) && $_POST["q_$qId"] == '0') {
-                $scores[$code]++;
+    if (isset($scale['no'])) {
+        foreach ($scale['no'] as $id) {
+            if (($_POST["q_$id"] ?? '') == '0') $currentScore++;
+        }
+    }
+    $scores[$code] = $currentScore;
+
+    // Track elevated (>=5) and high (>=8) scores for main scales (excluding L and F)
+    if (!in_array($code, ['L', 'F'])) {
+        if ($currentScore >= 5) {
+            $elevatedScales[] = $code;
+            if (isset($scale['professions'])) {
+                $professions[] = $scale['name'] . ": " . $scale['professions'];
             }
+        }
+        if ($currentScore >= 8) {
+            $highScales[] = $code;
         }
     }
 }
 
-// Check Validity
-if ($scores['L'] > 5) {
-    $validityWarning .= "<div class='alert alert-warning'>Увага: Високий показник за шкалою 'Правдивість'. Результати можуть бути недостовірні (нещирість).</div>";
-}
-if ($scores['F'] > 5) {
-    $validityWarning .= "<div class='alert alert-warning'>Увага: Високий показник за шкалою 'Агравація'. Результати можуть бути недостовірні (схильність підкреслювати проблеми).</div>";
-}
+// Validity checks
+if ($scores['L'] > 5) $warnings[] = "Високий показник нещирості (шкала L). Дані можуть бути недостовірними.";
+if ($scores['F'] > 5) $warnings[] = "Висока схильність підкреслювати проблеми (шкала F). Дані можуть бути недостовірними.";
 
-$packedResult['result_name'] = "Індивідуально-типологічний профіль";
-$packedResult['result_description'] = $validityWarning;
-
-$packedResult['result_description'] .= "<table class='table table-bordered'>";
-$packedResult['result_description'] .= "<tr><th>Шкала</th><th>Бал</th><th>Рівень</th><th>Опис</th></tr>";
-
-// Order of display logic (excluding L and F for the main table usually, but keeping them for complete picture is fine or separating them)
-// Let's display main scales I-VIII
-$mainScales = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
-
-foreach ($mainScales as $code) {
-    $score = $scores[$code];
-    $info = $testData['scales'][$code];
+// Check Combinations
+foreach ($testData['combinations'] as $combo) {
+    $match = true;
     
-    $levelText = "";
-    if ($score <= 2) $levelText = "Низький (гіпоемотивність/нещирість)"; // 0-1 implies special condition
-    elseif ($score <= 4) $levelText = $testData['levels']['norm'];
-    elseif ($score <= 7) $levelText = $testData['levels']['accent'];
-    else $levelText = $testData['levels']['high'];
+    if (isset($combo['requires'])) {
+        foreach ($combo['requires'] as $reqCode) {
+            if (!in_array($reqCode, $elevatedScales)) {
+                $match = false;
+                break;
+            }
+        }
+    }
 
-    $packedResult['result_description'] .= "<tr>";
-    $packedResult['result_description'] .= "<td>{$info['name']}</td>";
-    $packedResult['result_description'] .= "<td><strong>{$score}</strong></td>";
-    $packedResult['result_description'] .= "<td>{$levelText}</td>";
-    $packedResult['result_description'] .= "<td>{$info['description']}</td>";
-    $packedResult['result_description'] .= "</tr>";
+    if (isset($combo['requires_high'])) {
+        foreach ($combo['requires_high'] as $reqCode) {
+            if (!in_array($reqCode, $highScales)) {
+                $match = false;
+                break;
+            }
+        }
+    }
+
+    if ($match) {
+        $matchedCombinations[] = $combo['name'] . " - " . $combo['description'];
+    }
 }
-$packedResult['result_description'] .= "</table>";
 
-// Add specific text for combined types logic if needed, 
-// for now, we provide the scale breakdown as the primary output.
+// Pack results
+$packedResult['scores'] = $scores;
+$packedResult['warnings'] = $warnings;
+$packedResult['combinations'] = $matchedCombinations;
+$packedResult['professions'] = $professions;
+
+$packedResult['result_name'] = "Результати ІТО";
+
+// Build concise description text
+$descParts = [];
+foreach ($testData['scales'] as $code => $scale) {
+    $descParts[] = "{$scale['name']}: {$scores[$code]}";
+}
+$packedResult['result_description'] = implode("; ", $descParts);
+
 ?>
