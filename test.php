@@ -28,8 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- Validation Check ---
     $expectedQuestions = count($testData['questions']);
     $receivedAnswers = 0;
-    foreach ($_POST as $key => $val) {
-        if (strpos($key, 'q_') === 0 && !empty($val)) $receivedAnswers++;
+    foreach ($testData['questions'] as $q) {
+        // Check if the specific expected key exists for this question
+        // Assuming your inputs are named q_1, q_2, etc.
+        if (isset($_POST['q_' . $q['id']])) {
+            $receivedAnswers++;
+        }
     }
 
     if (empty($name) || $age < 14 || $receivedAnswers < $expectedQuestions) {
@@ -147,17 +151,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Array.from(forms).forEach(form => {
             form.addEventListener('submit', event => {
                 if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    // Scroll to the first error
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // --- FIXED JS ---
                     const firstError = form.querySelector(':invalid');
                     if (firstError) {
-                        firstError.closest('.mb-4').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Check if closest exists before calling scrollIntoView
+                        const container = firstError.closest('.mb-4');
+                        if (container) {
+                            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
                     }
                 }
-                form.classList.add('was-validated')
-            }, false)
-        })
+                form.classList.add('was-validated');
+            }, false);
+        });
     })()
 </script>
 </body>
