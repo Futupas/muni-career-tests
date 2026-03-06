@@ -68,9 +68,9 @@ $results = $stmt->fetchAll();
                     <td><?= $row['ip_address'] ?></td>
                     <td><?= $row['submission_time'] ?></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary copy-btn" data-json='<?= htmlspecialchars($jsonString) ?>'>copy</button>
-                        <button class="btn btn-sm btn-outline-info" onclick="downloadJSON(<?= $row['id'] ?>, '<?= addslashes(htmlspecialchars($jsonString)) ?>')">download</button>
-                        <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Ви 100% впевнені, що хочете видалити запис #<?= $row['id'] ?>? Це неможливо відмінити.')">delete</a>
+                        <button class="btn btn-sm btn-outline-primary copy-btn" data-json='<?= htmlspecialchars($jsonString, ENT_QUOTES) ?>'>copy</button>
+                        <button class="btn btn-sm btn-outline-info download-btn" data-json='<?= htmlspecialchars($jsonString, ENT_QUOTES) ?>' data-id="<?= $row['id'] ?>">download</button>
+                        <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Ви 100% впевнені?')">delete</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -81,6 +81,7 @@ $results = $stmt->fetchAll();
 <script>
 'use strict';
 
+// Logic for COPY and DOWNLOAD
 document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.onclick = () => {
         const json = btn.getAttribute('data-json');
@@ -92,18 +93,21 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
     };
 });
 
-function downloadJSON(id, jsonString) {
-    const blob = new Blob([jsonString], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'result_' + id + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
+document.querySelectorAll('.download-btn').forEach(btn => {
+    btn.onclick = () => {
+        const json = btn.getAttribute('data-json');
+        const id = btn.getAttribute('data-id');
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'result_' + id + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+});
 </script>
 </body>
 </html>
