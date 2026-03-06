@@ -51,5 +51,11 @@ CREATE TABLE test_results (
     
     // Fill checkboxes (if any)
     document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = true);
+
+    // Auto-submit the form
+    const form = document.querySelector('form');
+    if (form) {
+        form.submit();
+    }
 })();
 ```

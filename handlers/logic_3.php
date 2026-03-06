@@ -9,7 +9,7 @@ foreach ($testData['questions'] as $q) {
         $scores[$val]++;
         // Find the text for this choice
         // $text = ($q['a']['type'] == $val) ? $q['a']['text'] : $q['b']['text'];
-        $text = $q['a']['type'] . ' -- ' . $q['a']['text'] . '---' . $q['b']['text'];
+        $text = $val . ' --- ' . $q['a']['type'] . ' --- ' . $q['a']['text'] . '---' . $q['b']['text'] . ' --- ' . $q['options'][0]['text'];
         $userAnswers["Пара " . $q['id']] = mb_strimwidth($text, 0, $n, "...");
     }
 }
