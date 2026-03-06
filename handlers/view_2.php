@@ -1,22 +1,37 @@
-<?php foreach ($testData['questions'] as $blockIndex => $block): ?>
-    <div class="mb-4">
-        <h6 class="fw-bold mb-3"><?php echo htmlspecialchars($block['name']); ?></h6>
-        <div class="row g-3">
-            <?php foreach ($block['questions'] as $qIndex => $q): ?>
-                <div class="col-md-6">
-                    <?php 
-                        // Generate a safe numeric ID to avoid Cyrillic issues in HTML 'id' attribute
-                        $safeId = "b" . $block['id'] . "q" . $qIndex; 
-                    ?>
-                    <input type="radio" class="btn-check" 
-                           name="q_<?php echo $block['id']; ?>" 
-                           id="<?php echo $safeId; ?>" 
-                           value="<?php echo htmlspecialchars($q['value']); ?>" required>
-                    <label class="card card-body option-label h-100 d-flex align-items-center" for="<?php echo $safeId; ?>">
-                        <?php echo htmlspecialchars($q['text']); ?>
-                    </label>
-                </div>
-            <?php endforeach; ?>
+<div class="row">
+    <div class="col-12">
+        <p class="alert alert-info">Відповідайте щиро. Оберіть один варіант для кожного твердження.</p>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Твердження</th>
+                        <th class="text-center">Вірно</th>
+                        <th class="text-center">Невірно</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($testData['questions'] as $q): ?>
+                        <tr>
+                            <td><?php echo $q['id']; ?></td>
+                            <td><?php echo htmlspecialchars($q['text']); ?></td>
+                            <td class="text-center">
+                                <input class="form-check-input" type="radio" 
+                                       name="q_<?php echo $q['id']; ?>" 
+                                       id="q_<?php echo $q['id']; ?>_yes" 
+                                       value="1" required>
+                            </td>
+                            <td class="text-center">
+                                <input class="form-check-input" type="radio" 
+                                       name="q_<?php echo $q['id']; ?>" 
+                                       id="q_<?php echo $q['id']; ?>_no" 
+                                       value="0" required>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
-<?php endforeach; ?>
+</div>
