@@ -5,14 +5,14 @@ $userAnswers = [];
 
 foreach ($testData['questions'] as $q) {
     $qId = $q['id'];
-    $choice = $_POST["q_$qId"] ?? null; // 'a' or 'b'
+    $choice = $_POST["q_$qId"] ?? null; 
     
     if ($choice) {
-        $selectedOption = $q[$choice]; // gets the array ['text' => '...', 'type' => '...']
-        $type = $selectedOption['type'];
+        $data = $q[$choice]; // gets 'a' or 'b' data
+        $type = $data['type'];
         
         $scores[$type]++;
-        $userAnswers["Пара $qId"] = mb_strimwidth($selectedOption['text'], 0, $n, "...");
+        $userAnswers["Пара $qId"] = mb_strimwidth($data['text'], 0, $n, "...");
     }
 }
 
