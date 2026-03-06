@@ -13,7 +13,7 @@ foreach ($testData['questions'] as $q) {
             if ($option['text'] === $choiceText) {
                 $type = $option['value'];
                 $scores[$type]++;
-                $userAnswers["Пара $qId"] = mb_strimwidth($choiceText, 0, $n, "...");
+                $userAnswers["Пара $qId"] = mb_strimwidth('[' . $type . '] ' . $choiceText, 0, $n, "...");
                 break;
             }
         }
