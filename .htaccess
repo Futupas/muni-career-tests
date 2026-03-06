@@ -8,7 +8,7 @@ Options -Indexes
 
 # 2. Block access to specific internal files (db.php, README.md)
 # The (?i) makes it case-insensitive (blocks readme.md and README.MD)
-<FilesMatch "^(db\.php|(?i)readme\.md)$">
+<FilesMatch "^(auth\.php|db\.php|(?i)readme\.md)$">
     Require all denied
 </FilesMatch>
 
