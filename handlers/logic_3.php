@@ -8,7 +8,8 @@ foreach ($testData['questions'] as $q) {
     if ($val && isset($scores[$val])) {
         $scores[$val]++;
         // Find the text for this choice
-        $text = ($q['a']['type'] == $val) ? $q['a']['text'] : $q['b']['text'];
+        // $text = ($q['a']['type'] == $val) ? $q['a']['text'] : $q['b']['text'];
+        $text = $q['a']['type'] . ' -- ' . $q['a']['text'] . '---' . $q['b']['text'];
         $userAnswers["Пара " . $q['id']] = mb_strimwidth($text, 0, $n, "...");
     }
 }
