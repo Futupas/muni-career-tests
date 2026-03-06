@@ -1,4 +1,20 @@
-## SQL initialization
+# Web tests
+
+## Project Structure
+* `index.php` – The landing page listing all available tests from `tests/tests.json`.
+* `test.php` – The main test engine that parses the JSON, renders the UI via handler, and saves results to the DB.
+* `admin.php` – Admin panel to view and sort stored test results.
+* `db.php` – Database connection and environment configuration.
+* `handlers/` – PHP scripts containing specific view and logic code for different test types.
+* `tests/` – Directory containing the `.json` files for each individual test.
+
+## Logic Overview
+1. **Selection:** `index.php` reads the test list. `test.php` matches the URL slug to a JSON filename.
+2. **Dynamic Rendering:** `test.php` includes a `view_{type}.php` handler to render the questions dynamically based on the JSON structure.
+3. **Submission:** Upon POST, `test.php` validates the input and calls a `logic_{type}.php` handler to calculate the result based on the specific test's rules.
+4. **Storage:** Results are encoded as JSON and saved into the `test_results` MySQL table.
+
+## SQL Initialization
 
 ```sql
 DROP TABLE IF EXISTS test_results;
@@ -14,7 +30,7 @@ CREATE TABLE test_results (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-## Check everything
+## Auto-Fill Script (for testing)
 
 ```js
 (function() {
@@ -37,4 +53,3 @@ CREATE TABLE test_results (
     document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = true);
 })();
 ```
-
