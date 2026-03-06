@@ -4,24 +4,21 @@ $scores = ['R'=>0, 'I'=>0, 'S'=>0, 'K'=>0, 'P'=>0, 'A'=>0];
 $userAnswers = [];
 
 foreach ($testData['questions'] as $q) {
-    $qId = $q['id'];
-    $choice = $_POST["q_$qId"] ?? null; 
-    
-    if ($choice) {
-        $data = $q[$choice]; // gets 'a' or 'b' data
-        $type = $data['type'];
-        
-        $scores[$type]++;
-        $userAnswers["Пара $qId"] = mb_strimwidth($data['text'], 0, $n, "...");
+    $val = $_POST["q_" . $q['id']] ?? null;
+    if ($val && isset($scores[$val])) {
+        $scores[$val]++;
+        // Find the text for this choice
+        $text = ($q['a']['type'] == $val) ? $q['a']['text'] : $q['b']['text'];
+        $userAnswers["Пара " . $q['id']] = mb_strimwidth($text, 0, $n, "...");
     }
 }
 
 arsort($scores);
 $topTypeKey = array_key_first($scores);
-$res = $testData['types_info'][$topTypeKey] ?? null;
+$res = $testData['results'][$topTypeKey] ?? null;
 
 $packedResult['user_answers'] = $userAnswers;
-$packedResult['result_name'] = $res['name'] ?? 'Невідомо';
-$packedResult['result_description'] = $res['desc'] ?? '';
+$packedResult['result_name'] = $res['name'] ?? 'Unknown';
+$packedResult['result_description'] = $res['description'] ?? '';
 $packedResult['scores'] = $scores;
 ?>

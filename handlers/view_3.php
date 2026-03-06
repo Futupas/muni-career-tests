@@ -2,18 +2,20 @@
     <div class="mb-4">
         <h6 class="fw-bold mb-3">Пара №<?php echo $q['id']; ?></h6>
         <div class="row g-3">
-            <div class="col-md-6">
-                <input type="radio" class="btn-check" name="q_<?php echo $q['id']; ?>" id="q_<?php echo $q['id']; ?>_a" value="a" required>
-                <label class="card card-body option-label h-100 d-flex align-items-center" for="q_<?php echo $q['id']; ?>_a">
-                    <?php echo htmlspecialchars($q['a']['text']); ?>
-                </label>
-            </div>
-            <div class="col-md-6">
-                <input type="radio" class="btn-check" name="q_<?php echo $q['id']; ?>" id="q_<?php echo $q['id']; ?>_b" value="b" required>
-                <label class="card card-body option-label h-100 d-flex align-items-center" for="q_<?php echo $q['id']; ?>_b">
-                    <?php echo htmlspecialchars($q['b']['text']); ?>
-                </label>
-            </div>
+            <?php foreach ($q['options'] as $index => $option): ?>
+                <div class="col-md-6">
+                    <?php 
+                        $safeId = "q" . $q['id'] . "opt" . $index; 
+                    ?>
+                    <input type="radio" class="btn-check" 
+                           name="q_<?php echo $q['id']; ?>" 
+                           id="<?php echo $safeId; ?>" 
+                           value="<?php echo htmlspecialchars($option['value']); ?>" required />
+                    <label class="card card-body option-label h-100 d-flex align-items-center justify-content-center text-center" for="<?php echo $safeId; ?>">
+                        <?php echo htmlspecialchars($option['text']); ?>
+                    </label>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 <?php endforeach; ?>
