@@ -70,7 +70,12 @@ $results = $stmt->fetchAll();
                     <td>
                         <button class="btn btn-sm btn-outline-primary copy-btn" data-json='<?= htmlspecialchars($jsonString, ENT_QUOTES) ?>'>copy</button>
                         <button class="btn btn-sm btn-outline-info download-btn" data-json='<?= htmlspecialchars($jsonString, ENT_QUOTES) ?>' data-id="<?= $row['id'] ?>">download</button>
-                        <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Ви 100% впевнені?')">delete</a>
+                        <button 
+                            class="btn btn-sm btn-outline-danger" 
+                            onclick="confirmDelete(<?= $row['id'] ?>, '<?= addslashes(htmlspecialchars($row['user_name'])) ?>', <?= $row['user_age'] ?>, '<?= addslashes(htmlspecialchars($row['test_slug'])) ?>', '<?= $row['submission_time'] ?>')">
+                            delete
+                        </button>
+
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -108,6 +113,13 @@ document.querySelectorAll('.download-btn').forEach(btn => {
         URL.revokeObjectURL(url);
     };
 });
+
+function confirmDelete(id, name, age, slug, date) {
+    if (confirm(`Ви 100% впевнені, що хочете назавжди видалити результат #${id} (${name}, ${age} років, тест: ${slug}, дата: ${date})? Цю дію неможливо відмінити.`)) {
+        window.location.href = 'delete.php?id=' + id;
+    }
+}
+
 </script>
 </body>
 </html>
