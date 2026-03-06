@@ -3,9 +3,37 @@ $n = (int)($_ENV['QUESTION_TRUNCATE_LEN'] ?? 50);
 $scores = [];
 $userAnswers = [];
 $elevatedScales = [];
-$highScales = [];
 
-// 1. Process User Answers
+// 1. Calculate Scores based on keys in JSON
+foreach ($testData['scales'] as $code => $scale) {
+    $currentScore = 0;
+    if (isset($scale['yes'])) {
+        foreach ($scale['yes'] as $id) {
+            if (isset($_POST["q_$id"]) && $_POST["q_$id"] == '1') $currentScore++;
+        }
+    }
+    if (isset($scale['no'])) {
+        foreach ($scale['no'] as $id) {
+            if (isset($_POST["q_$id"]) && $_POST["q_$id"] == '0') $currentScore++;
+        }
+    }
+    
+    // Determine level from JSON
+    $level = "Низький рівень";
+    if ($currentScore >= 8) $level = "Дезадаптивні властивості";
+    elseif ($currentScore >= 5) $level = "Акцентуаційні риси";
+    elseif ($currentScore >= 3) $level = "Гармонійна особистість";
+             
+    $scores[$code] = [
+        'name' => $scale['name'],
+        'score' => $currentScore,
+        'level' => $level
+    ];
+    
+    if ($currentScore >= 5) $elevatedScales[] = $code;
+}
+
+// 2. Populate User Answers
 foreach ($testData['questions'] as $q) {
     $qId = $q['id'];
     $val = $_POST["q_$qId"] ?? null;
@@ -14,54 +42,18 @@ foreach ($testData['questions'] as $q) {
     }
 }
 
-// 2. Calculate Scores
-foreach ($testData['scales'] as $code => $scale) {
-    $scores[$code] = 0;
-    if (isset($scale['yes'])) {
-        foreach ($scale['yes'] as $id) {
-            if (($_POST["q_$id"] ?? '') == '1') $scores[$code]++;
-        }
-    }
-    if (isset($scale['no'])) {
-        foreach ($scale['no'] as $id) {
-            if (($_POST["q_$id"] ?? '') == '0') $scores[$code]++;
-        }
-    }
-    
-    // Determine elevated/high status
-    if (!in_array($code, ['L', 'F'])) {
-        if ($scores[$code] >= 5) $elevatedScales[] = $code;
-        if ($scores[$code] >= 8) $highScales[] = $code;
-    }
-}
-
-// 3. Map Interpretations and Combinations
-$resultsDescription = [];
-foreach ($scores as $code => $score) {
-    if (isset($testData['scales'][$code])) {
-        $resultsDescription[] = $testData['scales'][$code]['name'] . ": " . $score;
-    }
-}
-
-$combinations = [];
+// 3. Logic for Combinations defined in JSON
+$matchedCombinations = [];
 foreach ($testData['combinations'] as $combo) {
     $match = true;
-    if (isset($combo['requires'])) {
-        foreach ($combo['requires'] as $req) {
-            if (!in_array($req, $elevatedScales)) $match = false;
-        }
+    foreach ($combo['requires'] as $req) {
+        if (!in_array($req, $elevatedScales)) $match = false;
     }
-    if (isset($combo['requires_high'])) {
-        foreach ($combo['requires_high'] as $req) {
-            if (!in_array($req, $highScales)) $match = false;
-        }
-    }
-    if ($match) $combinations[] = $combo['name'] . ": " . $combo['description'];
+    if ($match) $matchedCombinations[] = $combo;
 }
 
+// 4. Pack results using JSON data
 $packedResult['user_answers'] = $userAnswers;
 $packedResult['scores'] = $scores;
-$packedResult['result_name'] = "Результати ІТО";
-$packedResult['result_description'] = implode("; ", $resultsDescription);
-$packedResult['combinations'] = $combinations;
+$packedResult['combinations'] = $matchedCombinations;
 ?>
