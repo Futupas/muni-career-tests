@@ -18,6 +18,8 @@ if (!$currentTestFile || !file_exists(__DIR__ . '/tests/' . $currentTestFile)) {
 
 $testData = json_decode(file_get_contents(__DIR__ . '/tests/' . $currentTestFile), true);
 $type = $testData['type'];
+// N for truncation from .env
+$n = (int)($_ENV['QUESTION_TRUNCATE_LEN'] ?? 10); 
 $submissionSuccess = false;
 $errorMessage = null;
 
@@ -25,18 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $age = (int)$_POST['age'];
 
-    // --- Validation Check ---
-    $expectedQuestions = count($testData['questions']);
+    // Validation
     $receivedAnswers = 0;
-    foreach ($testData['questions'] as $q) {
-        // Check if the specific expected key exists for this question
-        // Assuming your inputs are named q_1, q_2, etc.
-        if (isset($_POST['q_' . $q['id']])) {
-            $receivedAnswers++;
-        }
+    foreach ($_POST as $key => $val) {
+        if (strpos($key, 'q_') === 0) $receivedAnswers++;
     }
 
-    if (empty($name) || $age < 14 || $receivedAnswers < $expectedQuestions) {
+    if (empty($name) || $age < 14 || $receivedAnswers < count($testData['questions'])) {
         $errorMessage = "Будь ласка, заповніть всі поля та дайте відповіді на всі запитання.";
     } else {
         $packedResult = [
@@ -45,19 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'test_type' => $type
         ];
 
+        // Logic handler now calculates readable results and populates $packedResult
         $logicFile = __DIR__ . "/handlers/logic_{$type}.php";
         if (file_exists($logicFile)) {
             include $logicFile;
         }
 
-        $userAnswers = [];
-        foreach ($_POST as $key => $value) {
-            if (strpos($key, 'q_') === 0) {
-                $userAnswers[$key] = $value;
-            }
-        }
-        $packedResult['user_answers'] = $userAnswers;
-        
         $jsonString = json_encode($packedResult, JSON_UNESCAPED_UNICODE);
 
         $stmt = $pdo->prepare("INSERT INTO test_results (test_slug, user_name, user_age, result_json, ip_address) VALUES (?, ?, ?, ?, ?)");
