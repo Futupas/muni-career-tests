@@ -41,7 +41,7 @@ if (file_exists($testsFile)) {
                                 Показати опис ▼
                             </button>
                         </p>
-                        <div id="desc-<?php echo $test['slug']; ?>" class="spoiler-content mb-3 text-muted hidden">
+                        <div id="desc-<?php echo $test['slug']; ?>" class="mb-3 text-muted hidden">
                             <?php echo htmlspecialchars($test['description']); ?>
                         </div>
                         <a href="/test/<?php echo $test['slug']; ?>" class="btn btn-primary">Пройти тест</a>
