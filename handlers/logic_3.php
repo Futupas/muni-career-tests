@@ -4,13 +4,19 @@ $scores = ['R'=>0, 'I'=>0, 'S'=>0, 'K'=>0, 'P'=>0, 'A'=>0];
 $userAnswers = [];
 
 foreach ($testData['questions'] as $q) {
-    $val = $_POST["q_" . $q['id']] ?? null;
-    if ($val && isset($scores[$val])) {
-        $scores[$val]++;
-        // Find the text for this choice
-        // $text = ($q['a']['type'] == $val) ? $q['a']['text'] : $q['b']['text'];
-        $text = $val . ' --- ' . $q['a']['type'] . ' --- ' . $q['a']['text'] . '---' . $q['b']['text'] . ' --- ' . $q['options'][0]['text'];
-        $userAnswers["Пара " . $q['id']] = mb_strimwidth($text, 0, $n, "...");
+    $qId = $q['id'];
+    $choiceText = $_POST["q_$qId"] ?? null;
+    
+    if ($choiceText) {
+        // Iterate through options to find the matching type code
+        foreach ($q['options'] as $option) {
+            if ($option['text'] === $choiceText) {
+                $type = $option['value'];
+                $scores[$type]++;
+                $userAnswers["Пара $qId"] = mb_strimwidth($choiceText, 0, $n, "...");
+                break;
+            }
+        }
     }
 }
 
@@ -19,7 +25,7 @@ $topTypeKey = array_key_first($scores);
 $res = $testData['results'][$topTypeKey] ?? null;
 
 $packedResult['user_answers'] = $userAnswers;
-$packedResult['result_name'] = $res['name'] ?? 'Unknown';
+$packedResult['result_name'] = $res['name'] ?? 'Невідомо';
 $packedResult['result_description'] = $res['description'] ?? '';
 $packedResult['scores'] = $scores;
 ?>
