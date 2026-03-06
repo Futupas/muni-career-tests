@@ -8,18 +8,13 @@ foreach ($testData['questions'] as $q) {
     $val = $_POST["q_$qId"] ?? null;
     
     if ($val) {
+        // Increment score for the chosen type
         $scores[$val]++;
         
-        // Match the selected value (type) to the text
-        if ($q['a']['type'] == $val) {
-            $text = $q['a']['text'];
-        } else {
-            $text = $q['b']['text'];
-        }
+        // Find the text associated with the chosen type in this pair
+        $text = ($q['a']['type'] === $val) ? $q['a']['text'] : $q['b']['text'];
         
         $userAnswers["Пара $qId"] = mb_strimwidth($text, 0, $n, "...");
-    } else {
-        $userAnswers["Пара $qId"] = "Не обрано";
     }
 }
 
@@ -28,7 +23,6 @@ $topTypeKey = array_key_first($scores);
 $res = $testData['results'][$topTypeKey] ?? null;
 
 $packedResult['user_answers'] = $userAnswers;
-$packedResult['result_key'] = $topTypeKey;
 $packedResult['result_name'] = $res['name'] ?? 'Unknown';
 $packedResult['result_description'] = $res['description'] ?? '';
 $packedResult['scores'] = $scores;
