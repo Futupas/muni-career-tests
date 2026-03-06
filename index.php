@@ -20,6 +20,8 @@ if (file_exists($testsFile)) {
     <style>
         .spoiler-content { display: none; }
         .card:hover { transform: translateY(-5px); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card { align-items: flex-start; }
+        .card-body { width: 100%; }
     </style>
 </head>
 <body class="bg-body-tertiary">
@@ -56,7 +58,11 @@ if (file_exists($testsFile)) {
     // Spoiler Toggle
     function toggleSpoiler(id) {
         const el = document.getElementById(id);
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
     }
 </script>
 </body>
