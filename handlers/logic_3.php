@@ -5,25 +5,23 @@ $userAnswers = [];
 
 foreach ($testData['questions'] as $q) {
     $qId = $q['id'];
-    $val = $_POST["q_$qId"] ?? null;
+    $choice = $_POST["q_$qId"] ?? null; // 'a' or 'b'
     
-    if ($val) {
-        // Increment score for the chosen type
-        $scores[$val]++;
+    if ($choice) {
+        $selectedOption = $q[$choice]; // gets the array ['text' => '...', 'type' => '...']
+        $type = $selectedOption['type'];
         
-        // Find the text associated with the chosen type in this pair
-        $text = ($q['a']['type'] === $val) ? $q['a']['text'] : $q['b']['text'];
-        
-        $userAnswers["Пара $qId"] = mb_strimwidth($text, 0, $n, "...");
+        $scores[$type]++;
+        $userAnswers["Пара $qId"] = mb_strimwidth($selectedOption['text'], 0, $n, "...");
     }
 }
 
 arsort($scores);
 $topTypeKey = array_key_first($scores);
-$res = $testData['results'][$topTypeKey] ?? null;
+$res = $testData['types_info'][$topTypeKey] ?? null;
 
 $packedResult['user_answers'] = $userAnswers;
-$packedResult['result_name'] = $res['name'] ?? 'Unknown';
-$packedResult['result_description'] = $res['description'] ?? '';
+$packedResult['result_name'] = $res['name'] ?? 'Невідомо';
+$packedResult['result_description'] = $res['desc'] ?? '';
 $packedResult['scores'] = $scores;
 ?>
