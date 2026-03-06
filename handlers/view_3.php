@@ -10,7 +10,7 @@
                     <input type="radio" class="btn-check" 
                            name="q_<?php echo $q['id']; ?>" 
                            id="<?php echo $safeId; ?>" 
-                           value="<?php echo htmlspecialchars($option['value']); ?>" required />
+                           value="<?php echo htmlspecialchars($option['type']); ?>" required />
                     <label class="card card-body option-label h-100 d-flex align-items-center justify-content-center text-center" for="<?php echo $safeId; ?>">
                         <?php echo htmlspecialchars($option['text']); ?>
                     </label>
