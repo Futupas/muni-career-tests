@@ -18,9 +18,9 @@ sort($selectedIds);
 $key = implode('', $selectedIds);
 $res = $testData['results'][$key] ?? null;
 
-$packedResult['user_answers'] = $userAnswers;
 $packedResult['result_key'] = $key;
 $packedResult['result_name'] = $res['name'] ?? 'Unknown';
 $packedResult['result_description'] = $res['description'] ?? '';
 $packedResult['result_professions'] = $res['professions'] ?? '';
+$packedResult['user_answers'] = $userAnswers;
 ?>

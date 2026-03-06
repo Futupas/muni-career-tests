@@ -23,8 +23,8 @@ foreach ($testData['levels'] as $lvl) {
     }
 }
 
-$packedResult['user_answers'] = $userAnswers;
 $packedResult['score'] = $score;
 $packedResult['result_name'] = "Результат КОТ: " . $levelText;
 $packedResult['result_description'] = "Кількість правильних відповідей: " . $score . " з 50.";
+$packedResult['user_answers'] = $userAnswers;
 ?>

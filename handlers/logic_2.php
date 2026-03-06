@@ -53,7 +53,7 @@ foreach ($testData['combinations'] as $combo) {
 }
 
 // 4. Pack results using JSON data
-$packedResult['user_answers'] = $userAnswers;
 $packedResult['scores'] = $scores;
 $packedResult['combinations'] = $matchedCombinations;
+$packedResult['user_answers'] = $userAnswers;
 ?>

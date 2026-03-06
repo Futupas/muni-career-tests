@@ -34,6 +34,6 @@ foreach ($testData['scales'] as $code => $scaleData) {
     ];
 }
 
-$packedResult['user_answers'] = $userAnswers;
 $packedResult['results'] = $results;
+$packedResult['user_answers'] = $userAnswers;
 ?>

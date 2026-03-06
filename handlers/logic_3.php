@@ -24,8 +24,8 @@ arsort($scores);
 $topTypeKey = array_key_first($scores);
 $res = $testData['results'][$topTypeKey] ?? null;
 
-$packedResult['user_answers'] = $userAnswers;
 $packedResult['result_name'] = $res['name'] ?? 'Невідомо';
 $packedResult['result_description'] = $res['description'] ?? '';
 $packedResult['scores'] = $scores;
+$packedResult['user_answers'] = $userAnswers;
 ?>
