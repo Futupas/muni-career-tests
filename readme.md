@@ -1,18 +1,28 @@
-# Web tests
+Here is the refined `README.md`, boss. I’ve clarified the role of the handlers and added a note about the `.env` configuration.
+
+***
+
+# Web Tests Engine
 
 ## Project Structure
-* `index.php` – The landing page listing all available tests from `tests/tests.json`.
-* `test.php` – The main test engine that parses the JSON, renders the UI via handler, and saves results to the DB.
-* `admin.php` – Admin panel to view and sort stored test results.
-* `db.php` – Database connection and environment configuration.
-* `handlers/` – PHP scripts containing specific view and logic code for different test types.
-* `tests/` – Directory containing the `.json` files for each individual test.
+* `index.php` – Landing page listing available tests from `tests/tests.json`.
+* `test.php` – Test execution engine. Loads JSON, includes the appropriate `view_{type}.php`, and triggers `logic_{type}.php` upon submission.
+* `admin.php` – Secure panel (HTTP Auth) to view, sort, copy, download, and delete test results.
+* `db.php` – Database connection and environment loader.
+* `handlers/` – PHP scripts for rendering UI (`view_`) and processing logic (`logic_`) per test type.
+* `tests/` – Directory containing test configurations in JSON format (e.g., `2.4.json`).
+
+## Environment Configuration (`.env`)
+The system uses the following environment variables:
+* `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` – Database credentials.
+* `ADMIN_PASS` – Password for `admin.php` and `delete.php` (Basic Auth).
+* `QUESTION_TRUNCATE_LEN` – Integer; defines the maximum character length for truncation of question text in stored results.
 
 ## Logic Overview
-1. **Selection:** `index.php` reads the test list. `test.php` matches the URL slug to a JSON filename.
-2. **Dynamic Rendering:** `test.php` includes a `view_{type}.php` handler to render the questions dynamically based on the JSON structure.
-3. **Submission:** Upon POST, `test.php` validates the input and calls a `logic_{type}.php` handler to calculate the result based on the specific test's rules.
-4. **Storage:** Results are encoded as JSON and saved into the `test_results` MySQL table.
+1. **Selection:** `index.php` renders the test list. `test.php` uses the URL slug to locate the corresponding JSON file.
+2. **Rendering:** `test.php` dynamically includes a `view_{type}.php` file based on the `type` field in the JSON.
+3. **Processing:** On POST, `test.php` validates the input and invokes `logic_{type}.php`. This handler calculates scores, maps user answers to readable text, truncates data based on `QUESTION_TRUNCATE_LEN`, and prepares the `packedResult` array.
+4. **Storage:** The result is saved into the `test_results` MySQL table as a complete JSON object.
 
 ## SQL Initialization
 
@@ -31,6 +41,7 @@ CREATE TABLE test_results (
 ```
 
 ## Auto-Fill Script (for testing)
+Paste this into the browser console to automatically fill all fields and submit the test:
 
 ```js
 (function() {
@@ -43,9 +54,7 @@ CREATE TABLE test_results (
     const radios = document.querySelectorAll('input[type="radio"]');
     const grouped = {};
     radios.forEach(r => {
-        if (!grouped[r.name]) {
-            grouped[r.name] = r;
-        }
+        if (!grouped[r.name]) grouped[r.name] = r;
     });
     Object.values(grouped).forEach(r => r.checked = true);
     
@@ -54,8 +63,8 @@ CREATE TABLE test_results (
 
     // Auto-submit the form
     const form = document.querySelector('form');
-    if (form) {
-        form.submit();
-    }
+    if (form) form.submit();
 })();
 ```
+
+Is there anything else, boss?
