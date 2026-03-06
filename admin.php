@@ -2,7 +2,7 @@
 require 'db.php';
 
 // Authentication Check
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || $_SERVER['PHP_AUTH_PW'] !== $_ENV['ADMIN_PASS']) {
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== $_ENV['ADMIN_USER'] || $_SERVER['PHP_AUTH_PW'] !== $_ENV['ADMIN_PASS']) {
     header('WWW-Authenticate: Basic realm="Admin Area"');
     header('HTTP/1.0 401 Unauthorized');
     exit('Access Denied');
@@ -69,7 +69,7 @@ $results = $stmt->fetchAll();
                     <td><?= $row['submission_time'] ?></td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary copy-btn" data-json='<?= htmlspecialchars($jsonString) ?>'>copy</button>
-                        <a href="data:application/json;charset=utf-8,<?= urlencode($jsonString) ?>" download="result_<?= $row['id'] ?>.json" class="btn btn-sm btn-outline-info">download</a>
+                        <button class="btn btn-sm btn-outline-info" onclick="downloadJSON(<?= $row['id'] ?>, '<?= addslashes(htmlspecialchars($jsonString)) ?>')">download</button>
                         <a href="delete.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Ви 100% впевнені, що хочете видалити запис #<?= $row['id'] ?>? Це неможливо відмінити.')">delete</a>
                     </td>
                 </tr>
@@ -79,6 +79,8 @@ $results = $stmt->fetchAll();
     </div>
 </div>
 <script>
+'use strict';
+
 document.querySelectorAll('.copy-btn').forEach(btn => {
     btn.onclick = () => {
         const json = btn.getAttribute('data-json');
@@ -89,6 +91,19 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
         }).catch(() => { btn.innerText = 'failed'; });
     };
 });
+
+function downloadJSON(id, jsonString) {
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'result_' + id + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 </script>
 </body>
 </html>
