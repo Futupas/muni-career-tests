@@ -20,8 +20,7 @@ if (file_exists($testsFile)) {
     <style>
         .spoiler-content { display: none; }
         .card:hover { transform: translateY(-5px); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .card { align-items: flex-start; }
-        .card-body { width: 100%; }
+        .hidden { display: none !important }
     </style>
 </head>
 <body class="bg-body-tertiary">
@@ -34,7 +33,7 @@ if (file_exists($testsFile)) {
     <div class="row row-cols-1 row-cols-md-2 g-4">
         <?php foreach ($tests as $test): ?>
             <div class="col">
-                <div class="card h-100">
+                <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($test['name']); ?></h5>
                         <p class="card-text">
@@ -42,7 +41,7 @@ if (file_exists($testsFile)) {
                                 Показати опис ▼
                             </button>
                         </p>
-                        <div id="desc-<?php echo $test['slug']; ?>" class="spoiler-content mb-3 text-muted">
+                        <div id="desc-<?php echo $test['slug']; ?>" class="spoiler-content mb-3 text-muted hidden">
                             <?php echo htmlspecialchars($test['description']); ?>
                         </div>
                         <a href="/test/<?php echo $test['slug']; ?>" class="btn btn-primary">Пройти тест</a>
@@ -58,11 +57,7 @@ if (file_exists($testsFile)) {
     // Spoiler Toggle
     function toggleSpoiler(id) {
         const el = document.getElementById(id);
-        if (el.style.display === 'none' || el.style.display === '') {
-            el.style.display = 'block';
-        } else {
-            el.style.display = 'none';
-        }
+        el.classList.toggle('hidden');
     }
 </script>
 </body>
