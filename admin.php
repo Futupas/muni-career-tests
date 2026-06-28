@@ -12,8 +12,8 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== $_ENV['AD
 // 1. Pagination & Sorting Setup
 // ----------------------------------------------------------------------------------------------------
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50; // Items per page
-if ($limit < 1 || $limit > 200) $limit = 50; // Sanity check for limit
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10; // Items per page
+if ($limit < 1 || $limit > 200) $limit = 10; // Sanity check for limit
 
 $offset = ($page - 1) * $limit;
 
@@ -134,23 +134,23 @@ function getQueryParams(array $override = []): string {
                 <!-- Search by Name -->
                 <div class="col-md-3 col-lg-2">
                     <label for="search_name" class="form-label">Search Name</label>
-                    <input type="text" class="form-control" id="search_name" name="search_name" value="<?= htmlspecialchars($searchName) ?>" placeholder="e.g., John Doe">
+                    <input type="text" class="form-control" id="search_name" name="search_name" value="<?= htmlspecialchars($searchName) ?>" placeholder="e.g., John Doe" />
                 </div>
 
                 <!-- Search by Test Type -->
                 <div class="col-md-3 col-lg-2">
                     <label for="search_test_type" class="form-label">Search Test Type</label>
-                    <input type="text" class="form-control" id="search_test_type" name="search_test_type" value="<?= htmlspecialchars($searchTestType) ?>" placeholder="e.g., personality_test">
+                    <input type="text" class="form-control" id="search_test_type" name="search_test_type" value="<?= htmlspecialchars($searchTestType) ?>" placeholder="e.g., thinking-type" />
                 </div>
 
                 <!-- Search by Date Range -->
                 <div class="col-md-3 col-lg-2">
                     <label for="start_date" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" value="<?= htmlspecialchars($startDate) ?>">
+                    <input type="date" class="form-control" id="start_date" name="start_date" value="<?= htmlspecialchars($startDate) ?>" />
                 </div>
                 <div class="col-md-3 col-lg-2">
                     <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars($endDate) ?>">
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars($endDate) ?>" />
                 </div>
 
                 <!-- Items per page -->
